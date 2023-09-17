@@ -1184,8 +1184,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxSpeed: 5
-  acceleration: 20
-  deacceleration: 4
+  acceleration: 5
+  deacceleration: 7
   Coin: {fileID: 6559689312100754331, guid: acdd0dc68afef5043851fe8681930326, type: 3}
   textMeshProUGUI: {fileID: 1517596424}
 --- !u!212 &1011712278
@@ -1250,7 +1250,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -0.13904774, y: -1.7252879, z: 0}
-  m_LocalScale: {x: 5, y: 5, z: 1}
+  m_LocalScale: {x: 4, y: 4, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1213306397}
@@ -1712,7 +1712,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -275.33548, y: 187.87877}
+  m_AnchoredPosition: {x: -526, y: 323}
   m_SizeDelta: {x: 181.329, y: 36.2425}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1517596424
