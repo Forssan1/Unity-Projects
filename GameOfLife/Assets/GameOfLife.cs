@@ -1,4 +1,3 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -6,84 +5,127 @@ using UnityEngine;
 public class GameOfLife : MonoBehaviour
 {
     public GameObject cellPrefab;
-    
     Cell[,] cells;
-    float cellSize = 0.25f;
-    int numberOfColumn, numberOfRows;
-    int spawnChancePercentage = 1;
-
-    // Start is called before the first frame update
+    float cellSize = 0.25f; // Size of our cells
+    int numberOfColumns, numberOfRows;
+    int neighbourCount;
+    int spawnChancePercentage = 25;
     void Start()
     {
-        numberOfColumn = (int)Mathf.Floor((Camera.main.orthographicSize * Camera.main.aspect * 2) / cellSize);
-        numberOfRows = (int)Mathf.Floor(Camera.main.orthographicSize * 2 / cellSize);
+        // Lower framerate makes it easier to test and see what's happening.
         QualitySettings.vSyncCount = 0;
-        Application.targetFrameRate = 2;
+        Application.targetFrameRate = 10;
 
-        cells = new Cell[numberOfColumn, numberOfRows];
-    }
+        // Calculate our grid depending on size and cellSize
+        numberOfColumns = Mathf.FloorToInt((Camera.main.orthographicSize * Camera.main.aspect * 2) / cellSize);
+        numberOfRows = Mathf.FloorToInt((Camera.main.orthographicSize * 2) / cellSize);
 
-    // Update is called once per frame
-    void Update()
-    {
+
+        // Initiate our matrix array
+        cells = new Cell[numberOfColumns, numberOfRows];
+
+        // Create all objects
+        // For each row
         for (int y = 0; y < numberOfRows; y++)
         {
-            for (int x = 0; x < numberOfColumn; x++) // Use numberOfColumn here
+            // For each column in each row
+            for (int x = 0; x < numberOfColumns; x++)
             {
+                // Create our game cell objects, multiply by cellSize for correct world placement
                 Vector2 newPos = new Vector2(x * cellSize - Camera.main.orthographicSize * Camera.main.aspect, y * cellSize - Camera.main.orthographicSize);
 
-                cells[x, y] = Instantiate(cellPrefab, newPos, Quaternion.identity).GetComponent<Cell>();
+                var newCell = Instantiate(cellPrefab, newPos, Quaternion.identity);
+                newCell.transform.localScale = Vector2.one * cellSize;
 
-                //if (System.Random.Range(0, 100) < spawnChancePercentage)
-                //{
-                //    cells[x, y].alive = true;
-                //    cells[x, y].UpdateStatus();
+                cells[x, y] = newCell.GetComponent<Cell>();
 
-                //    // Activate the left neighbor
-                //    CellNeighbour leftNeighbor = new CellNeighbour(cells[x, y]);
-                //}
+
+                if (Random.Range(0, 100) < spawnChancePercentage)
+                {
+                    //cells[x, y].alive = true;
+
+                }
+                cells[x, y].UpdateStatus();
             }
         }
     }
 
-    public class CellNeighbour
+    void Update()
     {
-        public Cell cell;
-        private float cellSize = 0.25f;
-        public Vector2 cellPosition;
-        public float[] xOffset = {-1,1};
-        public float[] yOffset = {-1, 1};
-        public CellNeighbour(Cell cell)
+
+        for (int y = 0; y < numberOfRows; y++)
         {
-            this.cell = cell;
-            cellPosition = cell.transform.position;
-            Vector2 neighborPosition = new Vector2(cellPosition.x - cellSize, cellPosition.y);
-
-            
-            Cell Neighbor = FindCellAtPosition(neighborPosition);
-
-            if (Neighbor.alive == false)
+            for (int x = 0; x < numberOfColumns; x++)
             {
-                Neighbor.alive = true;
-                Neighbor.UpdateStatus();
+                neighbourCount = 0;
+                GetNeighbor(x, y);
+
+
+                // Any live cell with fewer than two live neighbors dies (underpopulation)
+                if (neighbourCount < 2)
+                {
+                    cells[x, y].alive = false; // Dead
+
+                }
+
+                // Any live cell with more than three live neighbors dies (overpopulation)
+                else if (neighbourCount > 3)
+                {
+                    cells[x, y].alive = false; // Dead
+
+                }
+
+
+                // Any dead cell with exactly three live neighbors becomes a live cell (reproduction)
+                else if (neighbourCount == 3)
+                {
+                    cells[x, y].alive = true; // Alive
+
+                }
+
+
+            }
+
+        }
+        for (int y = 0; y < numberOfRows; y++)
+        {
+            for (int x = 0; x < numberOfColumns; x++)
+            {
+                cells[x, y].UpdateStatus();
             }
         }
-        private Cell FindAllPositions() 
-        {
-            return cell;
-        }
 
-        private Cell FindCellAtPosition(Vector2 position)
+
+
+    }
+
+    void GetNeighbor(int x, int y)
+    {
+        for (int xOffset = -1; xOffset <= 1; xOffset++)
         {
-            foreach (Cell cell in GameObject.FindObjectsOfType<Cell>())
+            for (int yOffset = -1; yOffset <= 1; yOffset++)
             {
-                if (Vector2.Distance(cell.transform.position, position) < 0.01f)
+
+                if (xOffset == 0 && yOffset == 0)
                 {
-                    return cell;
+                    continue; // Skip the current cell itself
+                }
+
+                int neighborX = x + xOffset;
+                int neighborY = y + yOffset;
+
+                // Check if neighborX and neighborY are within valid bounds
+                if (neighborX >= 0 && neighborX < numberOfColumns && neighborY >= 0 && neighborY < numberOfRows)
+                {
+                    if (cells[neighborX, neighborY].cellState == 1)
+                    {
+
+                        neighbourCount++;
+                    }
                 }
             }
-            return null; 
         }
-    }
-}
 
+    }
+
+}
