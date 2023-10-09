@@ -1,25 +1,20 @@
 using System.Collections;
 using System.Collections.Generic;
-using Unity.VisualScripting;
-using UnityEditor;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 public class GameOfLife : MonoBehaviour
 {
     public GameObject cellPrefab;
-    public GameObject pauseMenu;
     Cell[,] cells;
     float cellSize = 0.25f; // Size of our cells
     int numberOfColumns, numberOfRows;
     int neighbourCount;
     int spawnChancePercentage = 25;
-    bool paused;
     void Start()
     {
         // Lower framerate makes it easier to test and see what's happening.
         QualitySettings.vSyncCount = 0;
-        Application.targetFrameRate = 20;
+        Application.targetFrameRate = 10;
 
         // Calculate our grid depending on size and cellSize
         numberOfColumns = Mathf.FloorToInt((Camera.main.orthographicSize * Camera.main.aspect * 2) / cellSize);
@@ -47,7 +42,7 @@ public class GameOfLife : MonoBehaviour
 
                 if (Random.Range(0, 100) < spawnChancePercentage)
                 {
-                    cells[x, y].alive = true;
+                    //cells[x, y].alive = true;
 
                 }
                 cells[x, y].UpdateStatus();
@@ -57,44 +52,35 @@ public class GameOfLife : MonoBehaviour
 
     void Update()
     {
-        PauseGame();
+
         for (int y = 0; y < numberOfRows; y++)
         {
             for (int x = 0; x < numberOfColumns; x++)
             {
+                neighbourCount = 0;
+                GetNeighbor(x, y);
 
-                if (paused == false)
+
+                // Any live cell with fewer than two live neighbors dies (underpopulation)
+                if (neighbourCount < 2)
                 {
-                    
-                    neighbourCount = 0;
-                    GetNeighbor(x, y);
+                    cells[x, y].alive = false; // Dead
 
-
-                    // Any live cell with fewer than two live neighbors dies (underpopulation)
-                    if (neighbourCount < 2)
-                    {
-                        cells[x, y].alive = false; // Dead
-
-                    }
-
-                    // Any live cell with more than three live neighbors dies (overpopulation)
-                    else if (neighbourCount > 3)
-                    {
-                        cells[x, y].alive = false; // Dead
-
-                    }
-
-
-                    // Any dead cell with exactly three live neighbors becomes a live cell (reproduction)
-                    else if (neighbourCount == 3)
-                    {
-                        cells[x, y].alive = true; // Alive
-
-                    }
                 }
-                else if (paused == true)
+
+                // Any live cell with more than three live neighbors dies (overpopulation)
+                else if (neighbourCount > 3)
                 {
-                    continue;
+                    cells[x, y].alive = false; // Dead
+
+                }
+
+
+                // Any dead cell with exactly three live neighbors becomes a live cell (reproduction)
+                else if (neighbourCount == 3)
+                {
+                    cells[x, y].alive = true; // Alive
+
                 }
 
 
@@ -108,8 +94,6 @@ public class GameOfLife : MonoBehaviour
                 cells[x, y].UpdateStatus();
             }
         }
-
-
 
 
 
@@ -143,22 +127,5 @@ public class GameOfLife : MonoBehaviour
         }
 
     }
-
-    void PauseGame()
-    {
-        if (Input.GetKeyDown(KeyCode.Escape) && paused == false)
-        {
-            paused = true;
-            pauseMenu.SetActive(true);
-        }
-
-        else if (Input.GetKeyDown(KeyCode.Escape) && paused == true)
-        {
-            paused = false;
-            pauseMenu.SetActive(false);
-        }
-    }
-
-
 
 }
